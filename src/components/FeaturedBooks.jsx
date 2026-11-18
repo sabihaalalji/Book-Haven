@@ -1,49 +1,58 @@
 
+import BookCard from '../BookCard'
 import { useState, useEffect } from 'react'
 
-function FeaturedBooks() {
+function FeaturedBooks({ searchTerm }) {
   const [books, setBooks] = useState([])
 
   useEffect(() => {
     async function fetchBooks() {
+      const query = searchTerm.trim() || "harry potter"
+
       const response = await fetch(
-        "https://openlibrary.org/search.json?q=harry+potter&limit=8"
+        `https://openlibrary.org/search.json?q=${query}&limit=8`
       )
 
       const data = await response.json()
-
-      setBooks(data.docs)
+      setBooks(data.docs || [])
     }
 
     fetchBooks()
-  }, [])
+  }, [searchTerm])
 
   return (
-    <section>
-      <div>
-        <h2>HANDPICKED FOR YOU</h2>
-        <h1>Discover Your Next Read</h1>
-        <p>Explore stories worth adding to your reading list.</p>
-      </div>
+    <section className="bg-white px-10 py-16">
+      <div className="max-w-7xl mx-auto">
 
-      <div>
-        {books.map((book) => (
-          <div key={book.key}>
-            <h3>{book.title}</h3>
+        <div className="mb-12">
+          <h2 className="text-sm font-semibold tracking-[0.2em] text-blue-600 mb-3">
+            HANDPICKED FOR YOU
+          </h2>
 
-            <img
-              src={`https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`}
-              alt={book.title}
+          <h1 className="text-4xl font-bold text-slate-900 mb-4">
+            Discover Your Next Read
+          </h1>
+
+          <p className="text-slate-500 text-lg">
+            Explore stories worth adding to your reading list.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          {books.map((book) => (
+            <BookCard
+              key={book.key}
+              title={book.title}
+              author={book.author_name?.[0] || "Unknown author"}
+              image={`https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`}
             />
+          ))}
+        </div>
 
-            <p>{book.author_name?.[0] || "Unknown author"}</p>
-
-            <p>{book.first_publish_year || "Year unknown"}</p>
-          </div>
-        ))}
       </div>
     </section>
   )
 }
 
 export default FeaturedBooks
+
